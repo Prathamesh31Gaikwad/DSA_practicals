@@ -1,0 +1,169 @@
+#include<iostream>
+#include<fstream>
+#include <cstring>
+using namespace std;
+
+class Student
+{
+    public:
+    char name[20];
+    char subject[20];
+    int roll;
+    char city[20];
+    float marks;
+    Student()
+    {
+        roll = 0;
+        strcpy(name, "");
+        strcpy(subject, "");
+        strcpy(city, "");
+        marks=0.0;
+    }
+    void getdata()
+    {
+        cout<<"Enter name, subject, roll no., city and marks\n";
+        cin>>name>>subject>>roll>>city>>marks;
+    }
+    void showdata()
+    {
+        cout<<name<<" "<<subject<<" "<<roll<<" "<<city<<" "<<marks<<endl;
+    }
+    int getroll()
+    {return roll;}
+};
+
+class file
+{
+    fstream fs;
+    ofstream fout;
+    ifstream fin;
+public:
+    void insert()
+    {
+        Student S;
+        S.getdata();
+        fout.open("prac.txt", ios::app);
+        //fout.write((char*)&S,sizeof(S));
+         fout << S.getroll() << " " << S.name << " " << S.subject << " " << S.city << " " << S.marks << endl;
+        fout.close();
+    }
+    void display()
+    {
+        Student S;
+        fin.open("prac.txt", ios::in);
+        while (fin >> S.roll >> S.name >> S.subject >> S.city >> S.marks) {
+        S.showdata();
+        }
+        fin.close();
+    }
+    void search(int key)
+    {
+        Student S;
+        int flag=0;
+        fin.open("prac.txt", ios::in);
+        while(fin >> S.roll >> S.name >> S.subject >> S.city >> S.marks)
+        {
+            if(S.getroll()==key)
+            {
+                S.showdata();
+                flag=1;
+                break;
+            }
+        }
+        if (flag==0)
+        {
+            cout<<"Not found\n";
+        }
+        fin.close();
+    }
+    void remove1(int key)
+    {
+        Student S;
+        int flag=0;
+        fin.open("prac.txt", ios::in);
+        fout.open("Temp.txt", ios::out);
+        while(fin >> S.roll >> S.name >> S.subject >> S.city >> S.marks)
+        {
+            if(S.getroll()!=key)
+            {
+                fout << S.getroll() << " " << S.name << " " << S.subject << " " << S.city << " " << S.marks << endl;
+            }
+        }     
+        fin.close();
+        fout.close();
+        remove("prac.txt");
+        rename("Temp.txt","prac.txt");
+        display();   
+    }
+    void edit(int key)
+    {
+        Student S;
+        int found=0;
+        fs.open("prac.txt", ios::in|ios::out);
+        while(fs >> S.roll >> S.name >> S.subject >> S.city >> S.marks)
+        {
+            if(S.getroll()==key)
+            {
+                found=1;
+                break;
+            }
+        }
+        if(found)
+        {
+            cout<<"Enter new details"<<endl;
+            S.getdata();
+            fs.seekp(fs.tellg()-sizeof(S));
+            fs << S.roll << " " << S.name << " " << S.subject << " " << S.city << " " << S.marks << endl;
+        }
+        fs.close();
+    }
+};
+
+int main()
+{
+    file f;
+    int choice, roll;
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Add student information\n";
+        cout << "2. Delete student information\n";
+        cout << "3. Display all student information\n";
+        cout << "4. Search for a student\n";
+        cout << "5. Edit student information\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                f.insert();
+                break;
+            case 2:
+                cout << "Enter roll number to delete: ";
+                cin >> roll;
+                f.remove1(roll);
+                break;
+            case 3:
+                cout << "\nStudent information:\n";
+                f.display();
+                break;
+            case 4:
+                cout << "Enter roll number to search: ";
+                cin >> roll;
+                f.search(roll);
+                break;
+            case 5:
+                cout << "Enter roll number to edit: ";
+                cin >> roll;
+                f.edit(roll);
+                break;
+            case 6:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 6);
+
+    return 0;
+}
